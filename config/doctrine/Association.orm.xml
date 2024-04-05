@@ -5,25 +5,18 @@
 
     <entity name="DataDog\AuditBundle\Entity\Association" table="audit_associations">
 
-        <id name="id" type="bigint" column="id">
+        <id name="id" type="integer" column="id">
             <generator strategy="IDENTITY"/>
-            <options>
-                <option name="unsigned">true</option>
-            </options>
         </id>
 
         <field name="typ" length="128" />
         <field name="tbl" length="128" nullable="true" />
         <field name="label" nullable="true" />
-        <field name="fk" type="integer">
-            <options>
-                <option name="unsigned">true</option>
-            </options>
-        </field>
+        <field name="fk" type="string" />
         <field name="class" />
 
         <indexes>
-            <index columns="fk"/>
+            <index name="class_fk_idx" columns="class,fk"/>
         </indexes>
 
     </entity>

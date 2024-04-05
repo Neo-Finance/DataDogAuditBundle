@@ -5,11 +5,8 @@
 
     <entity name="DataDog\AuditBundle\Entity\AuditLog" table="audit_logs">
 
-        <id name="id" type="bigint" column="id">
+        <id name="id" type="integer" column="id">
             <generator strategy="IDENTITY"/>
-            <options>
-                <option name="unsigned">true</option>
-            </options>
         </id>
 
         <field name="action" length="12" />
@@ -24,7 +21,7 @@
         <one-to-one field="blame" target-entity="Association" />
 
         <indexes>
-            <index columns="logged_at"/>
+            <index name="logged_at_idx" columns="logged_at"/>
         </indexes>
 
     </entity>
