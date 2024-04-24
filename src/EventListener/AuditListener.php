@@ -163,9 +163,6 @@ class AuditListener
                 continue;
             }
             $mapping = $collection->getMapping();
-            if (!$mapping['isOwningSide'] || $mapping['type'] !== ClassMetadataInfo::MANY_TO_MANY) {
-                continue; // ignore inverse side or one to many relations
-            }
             foreach ($collection->getInsertDiff() as $entity) {
                 if ($this->isEntityUnaudited($entity)) {
                     continue;
@@ -184,9 +181,6 @@ class AuditListener
                 continue;
             }
             $mapping = $collection->getMapping();
-            if (!$mapping['isOwningSide'] || $mapping['type'] !== ClassMetadataInfo::MANY_TO_MANY) {
-                continue; // ignore inverse side or one to many relations
-            }
             foreach ($collection->toArray() as $entity) {
                 if ($this->isEntityUnaudited($entity)) {
                     continue;
@@ -248,25 +242,37 @@ class AuditListener
 
     protected function associate(EntityManager $em, $source, $target, array $mapping): void
     {
+        if (isset($mapping['joinTable']['name'])) {
+            $table = $mapping['joinTable']['name'];
+        } else {
+            $table = $em->getClassMetadata($mapping['targetEntity'])->getTableName();
+        }
+
         $this->audit($em, [
             'source' => $this->assoc($em, $source),
             'target' => $this->assoc($em, $target),
             'action' => 'associate',
             'blame' => $this->blame($em),
             'diff' => null,
-            'tbl' => $mapping['joinTable']['name'],
+            'tbl' => $table,
         ]);
     }
 
     protected function dissociate(EntityManager $em, $source, $target, $id, array $mapping): void
     {
+        if (isset($mapping['joinTable']['name'])) {
+            $table = $mapping['joinTable']['name'];
+        } else {
+            $table = $em->getClassMetadata($mapping['targetEntity'])->getTableName();
+        }
+
         $this->audit($em, [
             'source' => $this->assoc($em, $source),
             'target' => array_merge($this->assoc($em, $target), ['fk' => $id]),
             'action' => 'dissociate',
             'blame' => $this->blame($em),
             'diff' => null,
-            'tbl' => $mapping['joinTable']['name'],
+            'tbl' => $table,
         ]);
     }
 
