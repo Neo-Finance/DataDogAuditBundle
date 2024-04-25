@@ -448,18 +448,14 @@ class AuditListener
             return call_user_func($this->labeler, $entity);
         }
         $meta = $em->getClassMetadata(get_class($entity));
-        switch (true) {
-            case $meta->hasField('title'):
-                return $meta->getReflectionProperty('title')->getValue($entity);
-            case $meta->hasField('name'):
-                return $meta->getReflectionProperty('name')->getValue($entity);
-            case $meta->hasField('label'):
-                return $meta->getReflectionProperty('label')->getValue($entity);
-            case $meta->getReflectionClass()->hasMethod('__toString'):
-                return (string)$entity;
-            default:
-                return "Unlabeled";
-        }
+
+        return match (true) {
+            $meta->hasField('name') => $meta->getReflectionProperty('name')->getValue($entity),
+            $meta->hasField('title') => $meta->getReflectionProperty('title')->getValue($entity),
+            $meta->hasField('label') => $meta->getReflectionProperty('label')->getValue($entity),
+            $meta->getReflectionClass()->hasMethod('__toString') => (string)$entity,
+            default => "Unlabeled",
+        };
     }
 
     protected function value(EntityManager $em, Type $type, $value)
