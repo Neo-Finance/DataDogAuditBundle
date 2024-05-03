@@ -24,11 +24,57 @@
         "symfony/framework-bundle": "^6.4",
         "symfony/console": "^6.4"
     },
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true,
+            "veewee/composer-run-parallel": true
+        }
+    },
+    "scripts": {
+        "php-lint": [
+            "XDEBUG_MODE=off bin/phplint src/ tests/ --jobs=10"
+        ],
+        "container-test": [
+            "XDEBUG_MODE=off bin/console lint:container"
+        ],
+        "yaml-lint": [
+            "XDEBUG_MODE=off bin/console lint:yaml --parse-tags config/ translations/"
+        ],
+        "phpunit-test": [
+            "XDEBUG_MODE=off bin/simple-phpunit"
+        ],
+        "phpcs-fix": [
+            "XDEBUG_MODE=off bin/php-cs-fixer fix -v --diff"
+        ],
+        "phpstan": [
+            "XDEBUG_MODE=off bin/phpstan analyze"
+        ],
+        "psalm": [
+            "XDEBUG_MODE=off bin/psalm"
+        ],
+        "rector": [
+            "XDEBUG_MODE=off bin/rector process --dry-run"
+        ],
+        "test": [
+            "@phpcs-fix",
+            "@parallel rector phpstan psalm php-lint container-test yaml-lint phpunit-test"
+        ]
+    },
     "require-dev": {
         "ext-pdo": "*",
         "ext-pdo_sqlite": "*",
-        "phpunit/phpunit": "^9",
-        "symfony/phpunit-bridge": "^6.4"
+        "friendsofphp/php-cs-fixer": "^3.1",
+        "overtrue/phplint": "^9.0",
+        "phpstan/extension-installer": "^1.1.0",
+        "phpstan/phpstan": "^1.6.2",
+        "phpstan/phpstan-doctrine": "^1.3.3",
+        "phpstan/phpstan-symfony": "^1.1.8",
+        "psalm/plugin-symfony": "^5.0",
+        "rector/rector": "^1.0.3",
+        "symfony/phpunit-bridge": "6.4.*",
+        "symfony/var-dumper": "6.4.*",
+        "veewee/composer-run-parallel": "^1.0",
+        "vimeo/psalm": "^5.6"
     },
     "autoload": {
         "psr-4": {

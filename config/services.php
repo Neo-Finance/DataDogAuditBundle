@@ -15,7 +15,7 @@ return static function (ContainerConfigurator $container) {
     $services
         ->set('data_dog_audit.listener.audit', AuditListener::class)->private()
         ->arg(0, new Reference(TokenStorageInterface::class))
-        ->tag('doctrine.event_listener', ['event' => Events::onFlush,])
+        ->tag('doctrine.event_listener', ['event' => Events::onFlush])
     ;
 
     $services->set('data_dog_audit.command.delete_old_logs', AuditLogDeleteOldLogsCommand::class)

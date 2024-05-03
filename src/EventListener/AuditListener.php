@@ -11,7 +11,6 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\OnFlushEventArgs;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Role\SwitchUserRole;
@@ -98,18 +97,20 @@ class AuditListener
     {
         if (!empty($this->auditedEntities)) {
             // only selected entities are audited
-            $isEntityUnaudited = TRUE;
+            $isEntityUnaudited = true;
             foreach (array_keys($this->auditedEntities) as $auditedEntity) {
                 if ($entity instanceof $auditedEntity) {
-                    $isEntityUnaudited = FALSE;
+                    $isEntityUnaudited = false;
+
                     break;
                 }
             }
         } else {
-            $isEntityUnaudited = FALSE;
+            $isEntityUnaudited = false;
             foreach (array_keys($this->unauditedEntities) as $unauditedEntity) {
                 if ($entity instanceof $unauditedEntity) {
-                    $isEntityUnaudited = TRUE;
+                    $isEntityUnaudited = true;
+
                     break;
                 }
             }
@@ -126,7 +127,7 @@ class AuditListener
         $loggers = [
             new AuditLogger(function () use ($em) {
                 $this->flush($em);
-            })
+            }),
         ];
 
         // extend the sql logger
@@ -363,7 +364,7 @@ class AuditListener
                 $typ = Type::getType(Types::BIGINT); // relation
             }
             // @TODO: this check may not be necessary, simply it ensures that empty values are nulled
-            if (in_array($name, ['source', 'target', 'blame']) && $data[$name] === false) {
+            if (in_array($name, ['source', 'target', 'blame']) && false === $data[$name]) {
                 $data[$name] = null;
             }
             $this->auditInsertStmt->bindValue($idx++, $data[$name], $typ);
@@ -380,6 +381,7 @@ class AuditListener
             Type::getType($meta->fieldMappings[$pk]['type']),
             $meta->getReflectionProperty($pk)->getValue($entity)
         );
+
         return $pk;
     }
 
@@ -407,6 +409,7 @@ class AuditListener
                 ];
             }
         }
+
         return $diff;
     }
 
@@ -435,7 +438,8 @@ class AuditListener
     protected function typ($className): string
     {
         // strip prefixes and repeating garbage from name
-        $className = preg_replace("/^(.+\\\)?(.+)(Bundle\\\Entity)/", "$2", $className);
+        $className = preg_replace("/^(.+\\\)?(.+)(Bundle\\\Entity)/", '$2', $className);
+
         // underscore and lowercase each subdirectory
         return implode('.', array_map(function ($name) {
             return strtolower(preg_replace('/(?<=\\w)(?=[A-Z])/', '_$1', $name));
@@ -454,7 +458,7 @@ class AuditListener
             $meta->hasField('title') => $meta->getReflectionProperty('title')->getValue($entity),
             $meta->hasField('label') => $meta->getReflectionProperty('label')->getValue($entity),
             $meta->getReflectionClass()->hasMethod('__toString') => (string)$entity,
-            default => "Unlabeled",
+            default => 'Unlabeled',
         };
     }
 
@@ -492,6 +496,7 @@ class AuditListener
         if ($token && $token->getUser() instanceof UserInterface && \method_exists($token->getUser(), 'getId')) {
             return $this->assoc($em, $token->getUser());
         }
+
         return null;
     }
 
@@ -509,13 +514,10 @@ class AuditListener
                 return $role->getSource()->getUser();
             }
         }
+
         return null;
     }
 
-    /**
-     * @param TokenInterface $token
-     * @return array
-     */
     private function getRoles(TokenInterface $token): array
     {
         if (method_exists($token, 'getRoleNames')) {

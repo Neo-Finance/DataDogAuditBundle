@@ -64,7 +64,7 @@ class TestKernel extends Kernel
 
     public function getProjectDir(): string
     {
-        if ($this->projectDir === null) {
+        if (null === $this->projectDir) {
             $this->projectDir = sys_get_temp_dir().'/sf_kernel_'.md5((string)mt_rand());
         }
 

@@ -44,7 +44,7 @@ class AuditLogDeleteOldLogsCommand extends Command
         )
             ->fetchAssociative();
 
-        if ($result === false) {
+        if (false === $result) {
             $output->writeln(sprintf('<info>No records to delete</info>'));
 
             return 0;
@@ -74,7 +74,7 @@ class AuditLogDeleteOldLogsCommand extends Command
             $startTime = microtime(true);
             $deletedRows = $stmt->executeStatement();
             $allRecords += $deletedRows;
-            echo round((microtime(true) - $startTime), 3) . "s ";
+            echo round(microtime(true) - $startTime, 3).'s ';
             sleep(1);
         } while ($deletedRows > 0);
 
@@ -95,7 +95,7 @@ class AuditLogDeleteOldLogsCommand extends Command
             $startTime = microtime(true);
             $deletedRows = $stmt->executeStatement();
             $allRecords += $deletedRows;
-            echo round((microtime(true) - $startTime), 3) . "s ";
+            echo round(microtime(true) - $startTime, 3).'s ';
             sleep(1);
         } while ($deletedRows > 0);
 

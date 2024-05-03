@@ -1,0 +1,61 @@
+name: CI
+
+on:
+    push:
+        branches:
+          - master
+          - stage
+    pull_request:
+        branches:
+          - master
+          - 'PISP-*'
+
+jobs:
+    php-checks:
+        runs-on: ubuntu-latest
+        container:
+            image: ghcr.io/neo-finance/php-development:8.3-amd64
+            credentials:
+                username: ${{ github.actor }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+        steps:
+            -   uses: actions/checkout@v3
+
+            -   name: Cache
+                id: composer-cache
+                uses: actions/cache@v3
+                with:
+                    path: |
+                        vendor
+                        ~/.composer/cache
+                        .phplint.cache
+                        .php_cs.cache
+                        .psalm_cache
+                        .phpstan.cache
+                    key: ${{ runner.os }}-php-v3-${{ hashFiles('**/composer.lock') }}
+
+            -   name: Install composer
+                env:
+                    COMPOSER_AUTH: '{"github-oauth": {"github.com": "${{secrets.PAT}}"} }'
+                run: XDEBUG_MODE=off composer install
+
+            -   name: PHP lint
+                run: XDEBUG_MODE=off ./bin/phplint src/ tests --cache=.phplint.cache --no-ansi --no-interaction --jobs=10
+
+            -   name: PHP Symfony container lint
+                run: XDEBUG_MODE=off ./bin/console lint:container --no-ansi --no-interaction
+
+            -   name: Yaml file lint
+                run: XDEBUG_MODE=off ./bin/console lint:yaml --parse-tags --no-ansi --no-interaction config/ translations/
+
+            -   name: PHPUnit
+                run: XDEBUG_MODE=off ./bin/simple-phpunit --colors=never
+
+            -   name: PHPStan
+                run: XDEBUG_MODE=off ./bin/phpstan analyze --no-progress --no-ansi --no-interaction
+
+            -   name: PHP CS
+                run: XDEBUG_MODE=off ./bin/php-cs-fixer fix --using-cache=yes --cache-file=.php_cs.cache -v --dry-run
+
+            -   name: Psalm
+                run: XDEBUG_MODE=off ./bin/psalm

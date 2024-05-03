@@ -19,7 +19,7 @@ class AuditLogger implements SQLLogger
     public function startQuery($sql, ?array $params = null, ?array $types = null): void
     {
         // right before commit insert all audit entries
-        if ($sql === '"COMMIT"') {
+        if ('"COMMIT"' === $sql) {
             \call_user_func($this->flusher);
         }
     }
